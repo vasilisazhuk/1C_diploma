@@ -1,0 +1,211 @@
+конст СКРИПТ_HTMX = "<script src='https://unpkg.com/htmx.org@1.9.4'></script>"  
+конст СТИЛЬ_ДРЕВОВИДНОЙ_СХЕМЫ =
+"
+<style>
+* {
+margin: 0;
+padding: 0;
+font-family: Arial;
+font-size: clamp(12px, 2vw, 16px);
+}
+.description{
+    font-style: italic;
+}
+.container {
+ overflow: auto; 
+ 
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+}
+.tree {
+
+display: flex;
+flex: 1 1 auto;
+position: relative;
+
+padding: 0 0 20px 0;
+justify-content: center;
+}
+.tree ul {
+    zoom: .9;
+position: relative;
+padding: 20px 0;
+transition: all 0.5s;
+}
+.tree li {
+    zoom: .9;
+list-style-type: none;
+float: left;
+position: relative;
+padding: 20px 5px 0 5px;
+text-align: center;
+transition: all 0.5s;
+}
+.tree li::before,
+.tree li::after {
+content: '';
+position: absolute;
+top: 0;
+right: 50%;
+width: calc(50% - 5px);
+height: 20px;
+border-top: 1px solid #ccc;
+}
+.tree li::after {
+right: auto;
+left: 50%;
+border-left: 1px solid #ccc;
+}
+.tree li:only-child::after,
+.tree li:only-child::before {
+display: none;
+}
+.tree li:only-child {
+padding-top: 0;
+}
+.tree li:first-child::before,
+.tree li:last-child::after {
+border: 0 none;
+}
+.tree li:last-child::before {
+border-right: 1px solid #ccc;
+border-radius: 0 2px 0 0;
+}
+.tree li:first-child::after {
+border-radius: 2px 0 0 0;
+}
+.tree ul ul::before {
+content: '';
+position: absolute;
+top: 0;
+left: 50%;
+width: 0;
+height: 20px;
+border-left: 1px solid #ccc;
+}
+.tree li a {
+display: inline-block;
+padding: 5px 10px;
+border: 1px solid #ccc;
+border-radius: 2px;
+text-decoration: none;
+background-color: gold;
+color: #444;
+transition: all 0.5s;
+hyphens: auto;
+white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tree li a:hover,
+.tree li a:hover+ul li a {
+border: 1px solid cornflowerblue;
+background: lightskyblue;
+color: #111;
+
+}
+.tree li a:hover+ul li::after,
+.tree li a:hover+ul li::before,
+.tree li a:hover+ul::before,
+.tree li a:hover+ul ul::before {
+border-color: #333;
+}
+img {
+display: block;
+width: 50px;
+height: 50px;
+border-radius: 50px;
+opacity: 0.4;
+}
+.tree li a:hover img,
+.tree li a:hover+ul img {
+opacity: 0.8;
+}
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.button{
+   isolation: isolate; 
+   all: initial;  
+}
+</style>
+
+"
+
+/*
+ * класс контейнера "tree"
+ * структура документа
+ *     <div class = "tree">
+ *     <ul>
+ *         <li>
+ *             <details>
+ *                 <summary>
+ *                     <a>
+ *                         Элемент
+ *                          <div class ="description">Описание</div> 
+ *                     </a>
+ *                 </summary>
+ *                 <ul>
+ *                     <li>...</li>
+ *                 </ul>
+ *             </details>
+ *         </li>
+ *     </ul>
+ *     </div>
+ */
+@Локально
+@НаСервере
+статический метод СформироватьУзелОрганиграммы(Название: Строка, Описание: Строка, Уид: Строка, Изображение: Строка,
+        Обработчик: Строка = "", Пояснение = "", ИдНСИ = ""): Строка
+    //<button %Обработчик>Подробнее</button>
+    
+    возврат
+    "
+    <a id = %ИдНСИ>%Изображение 
+    <h3>%Название</h3>
+    <div class = 'description'>%Описание</div>
+    <div class = 'mark'>%Пояснение</div>
+    </a>
+    "
+;
+//<a href='http://localhost:9090/applications/GIcopmany-structura---dev-Issue-GICOPMANYS-16/employees_list?emp=00000'>Переход по url</a>
+    
+
+@Локально
+@НаСервере
+статический метод СформироватьУзелСПодчиненными(УзелыОрганиграммы: Массив<УзелОрганиграммы?>|Массив<УзелОрганиграммы>): Строка
+    пер Верстка = "<ul>"
+    для Элемент из УзелыОрганиграммы
+        если Элемент != Неопределено
+        пер Изображение = ВерсткаОбщееСервер.ПолучитьСодержимоеФото(Элемент.Изображение, Элемент.Наименование)
+        Верстка = Верстка + "<li><details><summary>" + СформироватьУзелОрганиграммы(Название = Элемент
+                .Наименование, Описание = Элемент.Описание, Уид = Элемент.ОбъектДанных.Ид.ВСтроку(), Изображение = Изображение,
+                Пояснение = Элемент.Пояснение, ИдНСИ = Элемент.ИдНСИ) + "</summary>"
+        если не Элемент.ДочерниеЭлементы.Пусто()
+            Верстка = Верстка + СформироватьУзелСПодчиненными(Элемент.ДочерниеЭлементы)
+        ;
+        //;
+        Верстка = Верстка + "</details><a class=button href='http://localhost:9090/applications/GIcopmany-structura---dev-Issue-GICOPMANYS-16/employees_list?emp=00000'>Переход по url</a></li>"
+        ;
+    ;
+    Верстка = Верстка + "</ul>"
+    
+    возврат Верстка
+;
+
+@ВПроекте
+@НаСервере @ДоступноСКлиента
+метод ПолучитьРазметку(УзелыОрганиграммы: Массив<УзелОрганиграммы?>): Строка
+    возврат СКРИПТ_HTMX +СТИЛЬ_ДРЕВОВИДНОЙ_СХЕМЫ + "<div classs= 'container'><div class = 'tree'>" + СформироватьУзелСПодчиненными(УзелыОрганиграммы) + "</div></div>"
+;
+@ВПроекте
+@НаСервере @ДоступноСКлиента
+метод ПолучитьРазметку(УзелыОрганиграммы: Массив<УзелОрганиграммы>): Строка
+    возврат СКРИПТ_HTMX +СТИЛЬ_ДРЕВОВИДНОЙ_СХЕМЫ + "<div classs= 'container'><div class = 'tree'>" + СформироватьУзелСПодчиненными(УзелыОрганиграммы) + "</div></div>"
+;
