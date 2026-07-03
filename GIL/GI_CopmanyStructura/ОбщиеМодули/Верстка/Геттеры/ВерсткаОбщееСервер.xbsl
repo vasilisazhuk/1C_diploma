@@ -31,7 +31,7 @@
 
     знч ИзображениеBase64 = ИзображениеСтрокой(ИзображениеПроверено)
     знч ТипИзображения = ПолучитьТипИзображения(ИзображениеПроверено)
-    знч Результат = 
+    знч Результат =
     "
     <div class = 'img--wrapper'>
         <img src='data:%{ТипИзображения};base64,%{ИзображениеBase64}' alt='%ОписаниеИзображения'>
@@ -44,10 +44,10 @@
 метод ПолучитьКнопкуГлавнойИерархии(Адрес: Строка = ""): Строка
     знч Подразделение = УправлениеСостоянием.ПолучитьПодразделениеПоУмолчанию() == Неопределено ? ""
         : УправлениеСостоянием.ПолучитьПодразделениеПоУмолчанию().Ид.ВСтроку()
-    возврат 
+    возврат
     "
     <div class='main-scheme'>
-        <button class='btn-nav-ext' hx-get='%{Адрес}api/department/schema?id=%{Подразделение}' hx-target='#frontend'>Вернутся к организационной структуре</button>
+        <button class='btn-nav-ext' hx-get='%{Адрес}api/department/schema?id=%{Подразделение}' hx-target='#frontend'>Перейти к организационной структуре</button>
     </div>
     "
 ;
@@ -56,10 +56,10 @@
 метод ПолучитьКнопкуЮридическойИерархии(Адрес: Строка = ""): Строка
     знч Организация = УправлениеСостоянием.ПолучитьОргЕдиницуПоУмолчанию() == Неопределено ? ""
         : УправлениеСостоянием.ПолучитьОргЕдиницуПоУмолчанию().Ид.ВСтроку()
-    возврат 
+    возврат
     "
     <div class='main-scheme'>
-        <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация.ВСтроку()}' hx-target='#frontend'>Вернутся к юридической структуре</button>
+        <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация.ВСтроку()}' hx-target='#frontend'>Перейти к юридической структуре</button>
     </div>
     "
 ;
@@ -73,13 +73,13 @@
 ;
 
 @ВПроекте
-метод ПолучитьКнопкиМасштабирования(): Строка
-    возврат 
+метод ПолучитьКнопкиМасштабирования(Область: Строка = ""): Строка
+    возврат
     "
     <div class='wrapper-operation'>
-        <div class='btn-oper-plus' id='zoomInBtn'>+</div>
-        <div class='btn-oper-minus' id='zoomOutBtn'>-</div>
-        <div class='zoom-value' id='zoomValue' style='display: inline-block; margin-left: 15px; padding: 7px 15px; background: #0056b3; color: white; border-radius: 5px;'>100%</div>
+        <div class='btn-oper-plus' id='zoomInBtn%{Область}'>+</div>
+        <div class='btn-oper-minus' id='zoomOutBtn%{Область}'>-</div>
+        <div class='zoom-value' id='zoomValue%{Область}' style='display: inline-block; margin-left: 15px; padding: 7px 15px; background: #0056b3; color: white; border-radius: 5px;'>100%</div>
     </div>
     "
 ;
@@ -92,37 +92,33 @@
 
 @ВПроекте
 @НаСервере @ДоступноСКлиента
-метод ПолучитьСкриптМасштабирования(): Строка
-    возврат 
+метод ПолучитьСкриптМасштабирования(Область: Строка = ""): Строка
+    возврат
     "
         <script>
 (function() {
     let scale = 1;
-    const minScale = 0.3;   // минимальный масштаб 30%
-    const maxScale = 2;     // максимальный масштаб 200%
-    const step = 0.1;       // шаг изменения 10%
-    // Находим контейнер для масштабирования
-    const treeSchema = document.querySelector('.tree-schema');
-    const zoomValueDisplay = document.getElementById('zoomValue');
+    const minScale = 0.3;
+    const maxScale = 2;
+    const step = 0.1;
+    const treeSchema = document.querySelector('.tree-schema%{Область}');
+    const zoomValueDisplay = document.getElementById('zoomValue%{Область}');
     // Функция применения масштаба
     function applyZoom() {
         if (!treeSchema) return;
-        // Применяем transform к контейнеру tree-schema
         treeSchema.style.transform = 'scale(' + scale + ')';
-        treeSchema.style.transformOrigin = 'top left';
+        //treeSchema.style.transformOrigin = 'top centre';
         // Обновляем отображение процентов
         if (zoomValueDisplay) {
             zoomValueDisplay.textContent = Math.round(scale * 100) + '%';
         }
     }
-    // Увеличение
     function zoomIn() {
         if (scale + step <= maxScale) {
             scale += step;
             applyZoom();
         }
     }
-    // Уменьшение
     function zoomOut() {
         if (scale - step >= minScale) {
             scale -= step;
@@ -130,15 +126,15 @@
         }
     }
     // Назначаем обработчики событий
-    const zoomInBtn = document.getElementById('zoomInBtn');
-    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const zoomInBtn = document.getElementById('zoomInBtn%{Область}');
+    const zoomOutBtn = document.getElementById('zoomOutBtn%{Область}');
     if (zoomInBtn) {
         zoomInBtn.addEventListener('click', zoomIn);
     }
     if (zoomOutBtn) {
         zoomOutBtn.addEventListener('click', zoomOut);
     }
-    // Дополнительно: масштабирование колесиком мыши с зажатым Ctrl
+    //масштабирование колесиком мыши с зажатым Ctrl
     if (treeSchema) {
         treeSchema.addEventListener('wheel', function(e) {
             if (e.ctrlKey) {
@@ -151,7 +147,6 @@
             }
         });
     }
-    // Инициализация
     applyZoom();
 })();
     </script>

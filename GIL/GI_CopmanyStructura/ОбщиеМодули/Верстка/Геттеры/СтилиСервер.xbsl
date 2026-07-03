@@ -1,7 +1,7 @@
 @Глобально
 @НаСервере @ДоступноСКлиента
 метод ПолучитьСтильИерархии(ЦветЭлемента: Строка = "#FFFFFF"): Строка
-    возврат 
+    возврат
     "
 <style>* {
 margin: 0;
@@ -10,11 +10,25 @@ font-family: Arial;
 }
 .frontend{
     margin-top: 80px;
-    overflow-y: visible;
-    overflow-x: auto;
+    //flex: 1;
 }
 [class=*'label']{
 font-style: bold;
+}
+.tree-container{
+    overflow-y: visible;
+    overflow-x: visible;
+    flex: 1;
+}
+.isolate{
+    display: flex;
+    overflow-y: hidden;
+    //justify-content: center;
+    //width: 100vh;
+    width: 100%;
+    overflow-x: auto;
+    //min-width: max-content;
+    transform-origin: center center;
 }
 .tree-node-description{
 font-style: italic;
@@ -39,7 +53,7 @@ flex-direction: column;
 padding: 5px 10px;
 width: 250px;
 height: 250px;
-border: 1px solid #ccc;
+border: 1px solid rgba(0, 0, 0, 0.5);
 border-radius: 2px;
 text-decoration: none;
 color: #444;
@@ -61,30 +75,33 @@ text-overflow: ellipsis;
 .tree-node-description{
 font-size: 12px;
 }
-.tree-schema {
+[class*='tree-schema-'] {
+flex-grow: 1;
+//width: 100vh;
+//overflow-x: auto;
 display: flex;
 position: relative;
 padding: 20px;
 justify-content: center;
 white-space: nowrap;
 transition: transform 0.2s ease;
-transform-origin: top left;
-/*min-width: max-content;*/
+transform-origin: center center;
+//min-width: max-content;
 flex-direction: column;
 }
-.tree-schema ul,
-.tree-schema li {
-transform-origin: top left;
+[class*='tree-schema-'] ul,
+[class*='tree-schema-'] li {
+transform-origin: center center;
 }
-.tree-schema ul {
+[class*='tree-schema-'] ul {
 position: relative;
 margin: 0 auto;
 display: flex;
 flex-wrap: nowrap;
-overflow: visible;
+//overflow: visible;
 padding: 20px 0;
 }
-.tree-schema li {
+[class*='tree-schema-'] li {
 list-style-type: none;
 position: relative;
 float: left;
@@ -92,77 +109,82 @@ padding: 20px 5px 0 5px;
 text-align: center;
 flex: 0 0 auto;   /* запрещает сжатие/растяжение */
 }
-.tree-schema li.list > ul,
-.tree-schema li.list > details > ul  {
+[class*='tree-schema-'] li.list > ul,
+[class*='tree-schema-'] li.list > details > ul  {
 display: flex;
 flex-direction: column;
 align-items: center;
 margin-top: 10px;
 }
-.tree-schema li.tree > ul::before,
-.tree-schema li.tree > details > ul::before {
+[class*='tree-schema-'] li.tree > ul::before,
+[class*='tree-schema-'] li.tree > details > ul::before {
 content: '';
 position: absolute;
 top: 0;
 left: 50%;
 width: 0;
 height: 20px;
-border-left: 1px solid #ccc;
+border-left: 1px solid rgb(0, 0, 0);
 }
-.tree-schema li.tree > ul > li::before,
-.tree-schema li.tree > ul > li::after,
-.tree-schema li.tree > details > ul > li::before,
-.tree-schema li.tree > details > ul > li::after  {
+[class*='tree-schema-'] li.tree > ul > li::before,
+[class*='tree-schema-'] li.tree > ul > li::after,
+[class*='tree-schema-'] li.tree > details > ul > li::before,
+[class*='tree-schema-'] li.tree > details > ul > li::after  {
 content: '';
 position: absolute;
 top: 0;
 right: 50%;
 width: 50%;
 height: 20px;
-border-top: 1px solid #ccc;
+border-top: 1px solid rgb(0, 0, 0);
 }
-.tree-schema li.tree > ul > li::after,
-.tree-schema li.tree > details > ul > li::after {
+[class*='tree-schema-'] li.tree > ul > li::after,
+[class*='tree-schema-'] li.tree > details > ul > li::after {
 right: auto;
 left: 50%;
-border-left: 1px solid #ccc;
+border-left: 1px solid rgb(0, 0, 0);
 }
 .tree-details {
     display: block;
 }
 .tree-details > summary {
-    list-style: none;
+    //list-style: none;
     position: relative;
     cursor: pointer;
 }
-.tree-schema li.tree > ul > li:only-child::after,
-.tree-schema li.tree > ul > li:only-child::before,
-.tree-schema li.tree > details > ul > li:only-child::after,
-.tree-schema li.tree > details > ul > li:only-child::before  {
+[class*='tree-schema-'] li.tree > ul > li:only-child::after,
+[class*='tree-schema-'] li.tree > ul > li:only-child::before,
+[class*='tree-schema-'] li.tree > details > ul > li:only-child::after,
+[class*='tree-schema-'] li.tree > details > ul > li:only-child::before  {
 display: none;
 }
 
-.tree-schema li.tree > ul > li:only-child,
-.tree-schema li.tree > details > ul > li:only-child  {
+[class*='tree-schema-'] li.tree > ul > li:only-child,
+[class*='tree-schema-'] li.tree > details > ul > li:only-child  {
 padding-top: 0;
 }
-.tree-schema li.tree > ul > li:first-child::before,
-.tree-schema li.tree > ul > li:last-child::after,
-.tree-schema li.tree > details > ul > li:first-child::before,
-.tree-schema li.tree > details > ul > li:last-child::after  {
+[class*='tree-schema-'] li.tree > ul > li:first-child::before,
+[class*='tree-schema-'] li.tree > ul > li:last-child::after,
+[class*='tree-schema-'] li.tree > details > ul > li:first-child::before,
+[class*='tree-schema-'] li.tree > details > ul > li:last-child::after  {
 border: 0 none;
 }
-.tree-schema li.tree > ul > li:last-child::before,
-.tree-schema li.tree > details > ul > li:last-child::before {
-border-right: 1px solid #ccc;
+[class*='tree-schema-'] li.tree > ul > li:last-child::before,
+[class*='tree-schema-'] li.tree > details > ul > li:last-child::before {
+border-right: 1px solid rgb(0, 0, 0);
 border-radius: 0 2px 0 0;
 }
-.tree-schema li.tree > ul > li:first-child::after,
-.tree-schema li.tree > details > ul > li:first-child::after  {
+[class*='tree-schema-'] li.tree > ul > li:first-child::after,
+[class*='tree-schema-'] li.tree > details > ul > li:first-child::after  {
 border-radius: 2px 0 0 0;
 }
 .tree-node > div:last-child {
     margin-top: auto;
+}
+.updating-info{
+opacity: 0.5;
+font-size: 12px;
+font-style: italic;
 }
 [class*='wrapper']{
    background: #ffffff;
@@ -177,7 +199,7 @@ border-radius: 2px 0 0 0;
 }
 [class*='section-tree']{
 background: #ffffff;
-border: 1px solid #ccc; 
+border: 1px solid rgba(0, 0, 0, 0.5); 
 }
 [class*='btn-'] {
 display: inline-block;
@@ -187,7 +209,6 @@ color: white;
 border-radius: 5px;
 cursor: pointer;
 }
-
 [class*='btn-']:hover {
 color: white;
 }
@@ -203,9 +224,9 @@ btn-nav-link{
     background-color: #ffffff;
 }
 .wrapper-operation{
-position: fixed;
-   top: 20px;
-       right: 20px;
+    //position: fixed;
+    //top: 20px;
+    //   right: 20px;
        z-index: 9998;
        display: flex;
        flex-direction: row;
@@ -225,13 +246,10 @@ position: fixed;
 }
 </style>
 "
-; //width: 50px;
-//height: 50px;
-
-
+; 
 @ВПроекте
 метод ПолучитьСтильГлавнойНавигациии(): Строка
-    возврат 
+    возврат
     "
     <style> 
     .wrapper-navigation{
