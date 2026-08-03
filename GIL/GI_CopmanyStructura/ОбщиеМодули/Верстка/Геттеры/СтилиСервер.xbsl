@@ -1,20 +1,56 @@
 @Глобально
 @НаСервере @ДоступноСКлиента
 метод ПолучитьСтильИерархии(ЦветЭлемента: Строка = "#FFFFFF"): Строка
-    возврат 
+    возврат
     "
 <style>* {
 margin: 0;
 padding: 0;
 font-family: Arial;
 }
-.frontend{
-    margin-top: 80px;
-    overflow-y: visible;
-    overflow-x: auto;
+::selection {
+color: white;
+background-color:rgb(51, 190, 255);
 }
-[class=*'label']{
-font-style: bold;
+.frontend{
+margin-top: 80px;
+//flex: 1;
+}
+.wrapper-organization {
+    display: flex;
+    /* justify-content: space-evenly; */
+}
+.tree-container{
+overflow-y: visible;
+overflow-x: visible;
+flex: 1;
+//margin: auto;
+}
+#isolate-main{
+position: relative;
+}
+#org-structure{
+cursor: grab;
+user-select: none;
+}
+#org-structure.dragging{
+cursor: grabbing;
+z-index: 997;
+}
+.wrapper-organization {
+    display: flex;
+    justify-content: space-between;
+}
+.isolate{
+display: flex;
+flex-grow: 1;
+overflow-y: auto;
+width: 100 %;
+
+overflow-x: auto;
+//transform-origin: center center;
+justify-content: space-evenly;
+position: absolue;
 }
 .tree-node-description{
 font-style: italic;
@@ -39,7 +75,7 @@ flex-direction: column;
 padding: 5px 10px;
 width: 250px;
 height: 250px;
-border: 1px solid #ccc;
+border: 1px solid rgba(0, 0, 0, 0.5);
 border-radius: 2px;
 text-decoration: none;
 color: #444;
@@ -61,30 +97,29 @@ text-overflow: ellipsis;
 .tree-node-description{
 font-size: 12px;
 }
-.tree-schema {
+[class*='tree-schema-'] {
 display: flex;
 position: relative;
 padding: 20px;
 justify-content: center;
 white-space: nowrap;
 transition: transform 0.2s ease;
-transform-origin: top left;
-/*min-width: max-content;*/
+transform-origin: top center;
 flex-direction: column;
 }
-.tree-schema ul,
-.tree-schema li {
-transform-origin: top left;
+
+[class*='tree-schema-'] ul,
+[class*='tree-schema-'] li {
+transform-origin: center center;
 }
-.tree-schema ul {
+[class*='tree-schema-'] ul {
 position: relative;
 margin: 0 auto;
 display: flex;
 flex-wrap: nowrap;
-overflow: visible;
 padding: 20px 0;
 }
-.tree-schema li {
+[class*='tree-schema-'] li {
 list-style-type: none;
 position: relative;
 float: left;
@@ -92,92 +127,125 @@ padding: 20px 5px 0 5px;
 text-align: center;
 flex: 0 0 auto;   /* запрещает сжатие/растяжение */
 }
-.tree-schema li.list > ul,
-.tree-schema li.list > details > ul  {
+[class*='tree-schema-'] li.list > ul,
+[class*='tree-schema-'] li.list > details > ul,
+[class*='tree-schema-'] li.list > div > ul{
 display: flex;
 flex-direction: column;
 align-items: center;
-margin-top: 10px;
+padding: 0px;
 }
-.tree-schema li.tree > ul::before,
-.tree-schema li.tree > details > ul::before {
+[class*='tree-schema-'] li.list > ul > li{
+padding: 0px;
+}
+[class*='tree-schema-'] li.tree > ul::before,
+[class*='tree-schema-'] li.tree > ul > li::before,
+[class*='tree-schema-'] li.tree > details > ul::before,
+[class*='tree-schema-'] li.tree > div > ul::before,
+[class*='tree-schema-'] li.tree > ul > li::before  {
 content: '';
 position: absolute;
 top: 0;
 left: 50%;
 width: 0;
 height: 20px;
-border-left: 1px solid #ccc;
+border-left: 1px solid rgb(0, 0, 0);
 }
-.tree-schema li.tree > ul > li::before,
-.tree-schema li.tree > ul > li::after,
-.tree-schema li.tree > details > ul > li::before,
-.tree-schema li.tree > details > ul > li::after  {
+[class*='tree-schema-'] li.tree > ul > li::before,
+[class*='tree-schema-'] li.tree > ul > li::after,
+[class*='tree-schema-'] li.tree > details > ul > li::before,
+[class*='tree-schema-'] li.tree > details > ul > li::after,
+[class*='tree-schema-'] li.tree > div > ul > li::before,
+[class*='tree-schema-'] li.tree > div > ul > li::after   {
 content: '';
 position: absolute;
 top: 0;
 right: 50%;
 width: 50%;
 height: 20px;
-border-top: 1px solid #ccc;
+border-top: 1px solid rgb(0, 0, 0);
 }
-.tree-schema li.tree > ul > li::after,
-.tree-schema li.tree > details > ul > li::after {
+[class*='tree-schema-'] li.tree > ul > li::after,
+[class*='tree-schema-'] li.tree > details > ul > li::after,
+[class*='tree-schema-'] li.tree > div > ul > li::after {
 right: auto;
 left: 50%;
-border-left: 1px solid #ccc;
+border-left: 1px solid rgb(0, 0, 0);
 }
 .tree-details {
-    display: block;
+display: block;
 }
 .tree-details > summary {
-    list-style: none;
-    position: relative;
-    cursor: pointer;
+//list-style: none;
+position: relative;
+cursor: pointer;
 }
-.tree-schema li.tree > ul > li:only-child::after,
-.tree-schema li.tree > ul > li:only-child::before,
-.tree-schema li.tree > details > ul > li:only-child::after,
-.tree-schema li.tree > details > ul > li:only-child::before  {
+[class*='tree-schema-'] li.tree > ul > li:only-child::after,
+[class*='tree-schema-'] li.tree > ul > li:only-child::before,
+[class*='tree-schema-'] li.tree > details > ul > li:only-child::after,
+[class*='tree-schema-'] li.tree > details > ul > li:only-child::before,
+[class*='tree-schema-'] li.tree > div > ul > li:only-child::after,
+[class*='tree-schema-'] li.tree > div > ul > li:only-child::before {
 display: none;
 }
 
-.tree-schema li.tree > ul > li:only-child,
-.tree-schema li.tree > details > ul > li:only-child  {
+[class*='tree-schema-'] li.tree > ul > li:only-child,
+[class*='tree-schema-'] li.tree > details > ul > li:only-child,
+[class*='tree-schema-'] li.tree > div > ul > li:only-child  {
 padding-top: 0;
 }
-.tree-schema li.tree > ul > li:first-child::before,
-.tree-schema li.tree > ul > li:last-child::after,
-.tree-schema li.tree > details > ul > li:first-child::before,
-.tree-schema li.tree > details > ul > li:last-child::after  {
+[class*='tree-schema-'] li.tree > ul > li:first-child::before,
+[class*='tree-schema-'] li.tree > ul > li:last-child::after,
+[class*='tree-schema-'] li.tree > details > ul > li:first-child::before,
+[class*='tree-schema-'] li.tree > details > ul > li:last-child::after,
+[class*='tree-schema-'] li.tree > div > ul > li:first-child::before,
+[class*='tree-schema-'] li.tree > div > ul > li:last-child::after   {
 border: 0 none;
 }
-.tree-schema li.tree > ul > li:last-child::before,
-.tree-schema li.tree > details > ul > li:last-child::before {
-border-right: 1px solid #ccc;
+[class*='tree-schema-'] li.tree > ul > li:last-child::before,
+[class*='tree-schema-'] li.tree > details > ul > li:last-child::before, 
+[class*='tree-schema-'] li.tree > div > ul > li:last-child::before{
+border-right: 1px solid rgb(0, 0, 0);
 border-radius: 0 2px 0 0;
 }
-.tree-schema li.tree > ul > li:first-child::after,
-.tree-schema li.tree > details > ul > li:first-child::after  {
+[class*='tree-schema-'] li.tree > ul > li:first-child::after,
+[class*='tree-schema-'] li.tree > details > ul > li:first-child::after,
+[class*='tree-schema-'] li.tree > div > ul > li:first-child::after  {
 border-radius: 2px 0 0 0;
 }
 .tree-node > div:last-child {
-    margin-top: auto;
+margin-top: auto;
 }
-[class*='wrapper']{
-   background: #ffffff;
-   padding: 10px 15px;
-   border-radius: 8px;
-   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+.updating-info{
+opacity: 0.5;
+font-size: 12px;
+font-style: italic;
+}
+[class*='wrapper'] {
+    background: #ffffff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    //flex-grow: 1;
 }
 [class*='section']{
-   background:rgb(211, 234, 255);
-   padding: 10px 15px;
-   border-radius: 8px; 
+background:rgb(211, 234, 255);
+padding: 10px 15px;
+border-radius: 8px;
 }
+
 [class*='section-tree']{
 background: #ffffff;
-border: 1px solid #ccc; 
+border: 1px solid rgba(0, 0, 0, 0.5);
+}
+.section-note{
+background-color: transparent;
+}
+.section-label {
+font-weight: bold; /* Исправлено */
+}
+[class=*'label']{
+font-weight: bold;
 }
 [class*='btn-'] {
 display: inline-block;
@@ -187,7 +255,6 @@ color: white;
 border-radius: 5px;
 cursor: pointer;
 }
-
 [class*='btn-']:hover {
 color: white;
 }
@@ -200,38 +267,41 @@ background-color: #0056b3;
 color: #ffffff;
 }
 btn-nav-link{
-    background-color: #ffffff;
+background-color: #ffffff;
 }
 .wrapper-operation{
-position: fixed;
-   top: 20px;
-       right: 20px;
-       z-index: 9998;
-       display: flex;
-       flex-direction: row;
-       flex-wrap: wrap;
-       gap: 12px;
+//position: fixed;
+//top: 20px;
+//   right: 20px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .wrapper-card {
-    display: flex;
-    margin: 10px;
-    padding: 20px;
-    color: #444;
-    background-color: #ffffff;
-    overflow-y: visible;
-    flex-direction: column;
-    height: 100%;
-    margin-top: 80px;
+display: flex;
+margin: 10px;
+padding: 20px;
+color: #444;
+background-color: #ffffff;
+overflow-y: visible;
+flex-direction: column;
+height: 100%;
+margin-top: 80px;
 }
+.row {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+
 </style>
 "
-; //width: 50px;
-//height: 50px;
-
-
+; 
 @ВПроекте
 метод ПолучитьСтильГлавнойНавигациии(): Строка
-    возврат 
+    возврат
     "
     <style> 
     .wrapper-navigation{
@@ -240,8 +310,9 @@ position: fixed;
             left: 20px;
             z-index: 9999;
             display: flex;
-            flex-direction: row;
-            flex-wrap: wrap; 
+            //flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center; 
             gap: 12px;
     }
     [class*='nav-main-']{

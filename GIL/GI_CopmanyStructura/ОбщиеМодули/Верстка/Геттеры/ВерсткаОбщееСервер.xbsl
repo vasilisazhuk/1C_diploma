@@ -31,9 +31,9 @@
 
     знч ИзображениеBase64 = ИзображениеСтрокой(ИзображениеПроверено)
     знч ТипИзображения = ПолучитьТипИзображения(ИзображениеПроверено)
-    знч Результат = 
+    знч Результат =
     "
-    <div class = 'img--wrapper'>
+    <div class = 'img--wrapper' style='display: flex; justify-content: center;'>
         <img src='data:%{ТипИзображения};base64,%{ИзображениеBase64}' alt='%ОписаниеИзображения'>
     </div>
     "
@@ -44,10 +44,10 @@
 метод ПолучитьКнопкуГлавнойИерархии(Адрес: Строка = ""): Строка
     знч Подразделение = УправлениеСостоянием.ПолучитьПодразделениеПоУмолчанию() == Неопределено ? ""
         : УправлениеСостоянием.ПолучитьПодразделениеПоУмолчанию().Ид.ВСтроку()
-    возврат 
+    возврат
     "
     <div class='main-scheme'>
-        <button class='btn-nav-ext' hx-get='%{Адрес}api/department/schema?id=%{Подразделение}' hx-target='#frontend'>Вернутся к организационной структуре</button>
+        <button class='btn-nav-ext' hx-get='%{Адрес}api/department/schema?id=%{Подразделение}' hx-target='#frontend'>Перейти к организационной структуре</button>
     </div>
     "
 ;
@@ -56,10 +56,10 @@
 метод ПолучитьКнопкуЮридическойИерархии(Адрес: Строка = ""): Строка
     знч Организация = УправлениеСостоянием.ПолучитьОргЕдиницуПоУмолчанию() == Неопределено ? ""
         : УправлениеСостоянием.ПолучитьОргЕдиницуПоУмолчанию().Ид.ВСтроку()
-    возврат 
+    возврат
     "
     <div class='main-scheme'>
-        <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация.ВСтроку()}' hx-target='#frontend'>Вернутся к юридической структуре</button>
+        <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация.ВСтроку()}&type=none' hx-target='#frontend'>Перейти к юридической структуре</button>
     </div>
     "
 ;
@@ -73,17 +73,30 @@
 ;
 
 @ВПроекте
-метод ПолучитьКнопкиМасштабирования(): Строка
+метод ПолучитьКнопкиСтруктур(Организация: Строка, Адрес: Строка): Строка
     возврат 
     "
     <div class='wrapper-operation'>
-        <div class='btn-oper-plus' id='zoomInBtn'>+</div>
-        <div class='btn-oper-minus' id='zoomOutBtn'>-</div>
-        <div class='zoom-value' id='zoomValue' style='display: inline-block; margin-left: 15px; padding: 7px 15px; background: #0056b3; color: white; border-radius: 5px;'>100%</div>
+    <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация}&type=leg' hx-target='#structure-row'>Legal</button>
+    <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация}&type=fin' hx-target='#structure-row'>Finance</button>
+    <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация}&type=tax' hx-target='#structure-row'>Taxes</button>
+    <button class='btn-nav-ext' hx-get='%{Адрес}api/structure/schema?id=%{Организация}&type=org' hx-target='#structure-row'>OrgChart</button>
     </div>
     "
 ;
 
+@ВПроекте
+метод ПолучитьКнопкиМасштабирования(Область: Строка = ""): Строка
+    возврат
+    "
+    <div class='wrapper-operation'>
+        <div class='btn-oper-plus' id='zoomInBtn-%{Область}'>+</div>
+        <div class='btn-oper-minus' id='zoomOutBtn-%{Область}'>-</div>
+        <div class='zoom-value' id='zoomValue-%{Область}' style='display: inline-block; margin-left: 15px; padding: 7px 15px; background: #0056b3; color: white; border-radius: 5px;'>100%</div>
+        <div class='btn-oper-center' id='centerBtn'>Центрировать</div>
+    </div>
+    "
+;
 @ВПроекте
 @НаСервере @ДоступноСКлиента
 метод ПолучитьСкриптHTMX(): Строка
@@ -92,68 +105,173 @@
 
 @ВПроекте
 @НаСервере @ДоступноСКлиента
-метод ПолучитьСкриптМасштабирования(): Строка
-    возврат 
+метод ПолучитьСкриптМасштабирования(Область: Строка = ""): Строка
+    возврат
     "
         <script>
 (function() {
     let scale = 1;
-    const minScale = 0.3;   // минимальный масштаб 30%
-    const maxScale = 2;     // максимальный масштаб 200%
-    const step = 0.1;       // шаг изменения 10%
-    // Находим контейнер для масштабирования
-    const treeSchema = document.querySelector('.tree-schema');
-    const zoomValueDisplay = document.getElementById('zoomValue');
-    // Функция применения масштаба
-    function applyZoom() {
-        if (!treeSchema) return;
-        // Применяем transform к контейнеру tree-schema
-        treeSchema.style.transform = 'scale(' + scale + ')';
-        treeSchema.style.transformOrigin = 'top left';
-        // Обновляем отображение процентов
-        if (zoomValueDisplay) {
-            zoomValueDisplay.textContent = Math.round(scale * 100) + '%';
+    const minScale = 0.3;
+    const maxScale = 5;
+    const step = 0.1;
+    let oldScale = 1;
+    const treeSchema = document.querySelector('.tree-schema-%{Область}');
+    const zoomValueDisplay = document.getElementById('zoomValue-%{Область}');
+    const zoomInBtn = document.getElementById('zoomInBtn-%{Область}');
+    const zoomOutBtn = document.getElementById('zoomOutBtn-%{Область}');
+    function applyZoom(focusX = null, focusY = null) {
+    if (!treeSchema) return;
+
+    const style = window.getComputedStyle(treeSchema);
+    const matrix = new DOMMatrix(style.transform);
+    let currentX = matrix.m41 || 0;
+    let currentY = matrix.m42 || 0;
+    
+    // Пересчитываем координаты, чтобы точка фокуса осталась на месте
+    if (focusX !== null && focusY !== null) {
+        const rect = treeSchema.getBoundingClientRect();
+        // Находим координаты курсора относительно самого элемента ДО масштабирования
+        const mouseXInElement = (focusX - rect.left) / oldScale;
+        const mouseYInElement = (focusY - rect.top) / oldScale;
+
+        // Корректируем translate под новый масштаб
+        currentX -= mouseXInElement * (scale - oldScale);
+        currentY -= mouseYInElement * (scale -oldScale);
+    }
+
+    // Применяем изменения
+    treeSchema.style.transform = 'translate(' + currentX + 'px,' + currentY + 'px) scale(' + scale + ')';
+    
+    localStorage.setItem('scale%{Область}', scale);
+    
+    if (zoomValueDisplay) {
+        zoomValueDisplay.textContent = Math.round(scale * 100) + '%';
+    }
+}
+
+function changeZoom(isZoomIn, focusX = null, focusY = null) {
+    oldScale = scale; // Запоминаем старый масштаб для формулы
+    
+    if (isZoomIn) {
+        if (scale + step <= maxScale) scale += step;
+    } else {
+        if (scale - step >= minScale) scale -= step;
+    }
+    
+    applyZoom(focusX, focusY);
+}
+
+// Назначаем обработчики на кнопки (зум в центр карточки)
+if (zoomInBtn) {
+    zoomInBtn.addEventListener('click', () => {
+        const rect = treeSchema.getBoundingClientRect();
+        // Передаем центр карточки как точку фокуса
+        changeZoom(true, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+}
+if (zoomOutBtn) {
+    zoomOutBtn.addEventListener('click', () => {
+        const rect = treeSchema.getBoundingClientRect();
+        changeZoom(false, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+}
+
+// Масштабирование колесиком мыши (зум строго в точку курсора)
+if (treeSchema) {
+    treeSchema.addEventListener('wheel', function(e) {
+        if (e.ctrlKey) {
+            e.preventDefault();
+            // Передаем точные координаты курсора e.clientX и e.clientY
+            changeZoom(e.deltaY < 0, e.clientX, e.clientY);
         }
-    }
-    // Увеличение
-    function zoomIn() {
-        if (scale + step <= maxScale) {
-            scale += step;
-            applyZoom();
-        }
-    }
-    // Уменьшение
-    function zoomOut() {
-        if (scale - step >= minScale) {
-            scale -= step;
-            applyZoom();
-        }
-    }
-    // Назначаем обработчики событий
-    const zoomInBtn = document.getElementById('zoomInBtn');
-    const zoomOutBtn = document.getElementById('zoomOutBtn');
-    if (zoomInBtn) {
-        zoomInBtn.addEventListener('click', zoomIn);
-    }
-    if (zoomOutBtn) {
-        zoomOutBtn.addEventListener('click', zoomOut);
-    }
-    // Дополнительно: масштабирование колесиком мыши с зажатым Ctrl
-    if (treeSchema) {
-        treeSchema.addEventListener('wheel', function(e) {
-            if (e.ctrlKey) {
-                e.preventDefault();
-                if (e.deltaY < 0) {
-                    zoomIn();
-                } else {
-                    zoomOut();
-                }
+    });
+}
+    
+    })();
+    </script>
+    "
+;
+
+
+@ВПроекте
+@НаСервере @ДоступноСКлиента
+метод ПолучитьСкриптЦентрирования(Компонент: Строка = ""): Строка
+    возврат
+    "
+    <script>
+    const containerMain = document.getElementById('isolate-main');
+    let element = document.getElementById('anchor');
+    //element.scrollIntoView({ behavior:'smooth', inline: 'center', block: 'nearest'});
+    const centerBtn = document.getElementById('centerBtn');
+    
+    if (centerBtn) {
+        centerBtn.addEventListener('click',  function(event) 
+            {   //var height = 0 //containerMain.offsetHeight/2;
+                //var width = 0 //containerMain.offsetWidth/2;
+                //console.log('Высота:', height);
+                //console.log('', element.style.top); //style.left = '30px';
+                //element.style.transform = 'translate(' + height + 'px,' + width + 'px)';
+                //console.log('', element.style.top); //style.left = '30px';
+                element.scrollIntoView({ behavior:'smooth', inline: 'center', block: 'nearest'});
             }
-        });
+        );
     }
-    // Инициализация
-    applyZoom();
-})();
+    </script>
+    "
+;
+
+@ВПроекте
+@НаСервере @ДоступноСКлиента
+метод ПолучитьСкриптDragDrop(Область: Строка = "main", Компонент: Строка = ""): Строка
+    возврат
+    "
+    <script>
+    const container = document.getElementById('frontend');
+    let isDragging = false;
+    let offsetX, offsetY;
+    let startX, startY;
+    let currentX = 0;
+    let currentY = 0;
+    let target = null;
+    container.addEventListener('mousedown', (e) => { 
+        target = e.target.closest('[data-role=draggable]');
+        if (!target) {console.log('not found'); return};
+        isDragging = true;
+        //console.log('grabbed');
+        target.classList.add('dragging');
+        const style = window.getComputedStyle(target);
+        const matrix = new DOMMatrix(style.transform);
+        currentX = matrix.m41 || 0;
+        currentY = matrix.m42 || 0;
+        startX = e.clientX;
+        startY = e.clientY;
+        e.preventDefault();
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+    function onMouseMove(e) {
+        if (!isDragging) return;
+            //const currentScale = localStorage.getItem('scale%{Область}');
+        const containerRect = container.getBoundingClientRect();
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        let newX = currentX + dx;
+        let newY = currentY + dy;
+        let currentScale = localStorage.getItem('scale%{Область}');
+        console.log(currentScale);
+        const treeSchema = document.querySelector('.tree-schema-%{Область}');
+        //const scale = localStorage.getItem('scale%{Область}');
+        target.style.transform = 'translate(' + newX + 'px,' + newY + 'px) scale(' + currentScale + ')';
+        localStorage.setItem('scale%{Область}',currentScale);
+        
+    }
+    function onMouseUp() {
+        //console.log('dropped');
+        isDragging = false;
+        target.classList.remove('dragging');
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
     </script>
     "
 ;
